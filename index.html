@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>さんすうチャレンジ30</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        margin: 0;
+        font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+        background: linear-gradient(#9ee7ff, #fff4b8);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px;
+    }
+
+    .game {
+        width: 100%;
+        max-width: 520px;
+        background: white;
+        border-radius: 28px;
+        padding: 22px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+        text-align: center;
+    }
+
+    h1 {
+        margin-top: 5px;
+        font-size: 30px;
+    }
+
+    .status {
+        display: flex;
+        justify-content: space-between;
+        background: #f4f7ff;
+        border-radius: 16px;
+        padding: 12px 16px;
+        font-weight: bold;
+        margin-bottom: 18px;
+    }
+
+    .question-number {
+        font-size: 20px;
+        color: #555;
+        margin-bottom: 12px;
+    }
+
+    .question {
+        background: #fff9db;
+        border-radius: 20px;
+        padding: 20px 12px;
+        font-size: 24px;
+        line-height: 1.7;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .formula {
+        font-size: 34px;
+        font-weight: bold;
+        margin-top: 15px;
+    }
+
+    #answer {
+        width: 95px;
+        height: 70px;
+        font-size: 36px;
+        font-weight: bold;
+        text-align: center;
+        border: 4px solid #4d96ff;
+        border-radius: 12px;
+        background: white;
+        outline: none;
+    }
+
+    #answer:focus {
+        border-color: #ff8c42;
+        box-shadow: 0 0 0 4px rgba(255,140,66,0.18);
+    }
+
+    button {
+        width: 100%;
+        min-height: 62px;
+        border: none;
+        border-radius: 18px;
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 18px;
+        cursor: pointer;
+        touch-action: manipulation;
+    }
+
+    #checkBtn {
+        background: #4d96ff;
+        color: white;
+    }
+
+    #nextBtn {
+        display: none;
+        background: #56c271;
+        color: white;
+    }
+
+    #restartBtn {
+        display: none;
+        background: #ff9f43;
+        color: white;
+    }
+
+    .result {
+        min-height: 55px;
+        margin-top: 16px;
+        font-size: 25px;
+        font-weight: bold;
+    }
+
+    .correct {
+        color: #16a34a;
+        animation: pop 0.35s;
+    }
+
+    .wrong {
+        color: #e63946;
+        animation: shake 0.35s;
+    }
+
+    .progress-bg {
+        background: #e5e7eb;
+        height: 16px;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .progress {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, #4d96ff, #6bcb77);
+        transition: width 0.35s;
+    }
+
+    .finalScore {
+        font-size: 54px;
+        font-weight: bold;
+        color: #ff8c42;
+        margin: 20px 0;
+    }
+
+    @keyframes pop {
+        0% { transform: scale(0.7); }
+        60% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+        0%,100% { transform: translateX(0); }
+        25% { transform: translateX(-8px); }
+        75% { transform: translateX(8px); }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <h1>🧮 さんすうチャレンジ</h1>
+
+    <div class="status">
+        <span id="questionCount">1 / 30</span>
+        <span>⭐ <span id="score">0</span></span>
+    </div>
+
+    <div class="progress-bg">
+        <div class="progress" id="progress"></div>
+    </div>
+
+    <div id="gameArea">
+
+        <div class="question-number" id="category">
+            たし算
+        </div>
+
+        <div class="question">
+
+            <div id="questionText">
+                りんごが8こあります。<br>
+                あとから7こもらいました。
+            </div>
+
+            <div class="formula">
+                <span id="formulaLeft">8 ＋ 7 ＝</span>
+                <input
+                    id="answer"
+                    type="number"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    autocomplete="off"
+                >
+            </div>
+
+        </div>
+
+        <div class="result" id="result"></div>
+
+        <button id="checkBtn" onclick="checkAnswer()">
+            こたえる！
+        </button>
+
+        <button id="nextBtn" onclick="nextQuestion()">
+            つぎの問題 ➜
+        </button>
+
+    </div>
+
+    <div id="finishArea" style="display:none;">
+
+        <h2>🎉 ぜんぶおわったよ！</h2>
+
+        <div>あなたの点数は…</div>
+
+        <div class="finalScore">
+            <span id="finalScore"></span> / 30
+        </div>
+
+        <div id="finalMessage" style="font-size:24px;"></div>
+
+        <button id="restartBtn" onclick="restartGame()">
+            🔄 もういちど遊ぶ
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+/* ================================
+   30問の問題データ
+================================ */
+
+const questions = [
+
+    {
+        category:"たし算 🔵",
+        text:"りんごが8こあります。<br>あとから7こもらいました。<br>ぜんぶで何こ？",
+        formula:"8 ＋ 7 ＝",
+        answer:15
+    },
+
+    {
+        category:"ひき算 🟢",
+        text:"あめが18こあります。🍬<br>9こ食べました。<br>のこりは何こ？",
+        formula:"18 − 9 ＝",
+        answer:9
+    },
+
+    {
+        category:"たし算 🔵",
+        text:"えんぴつが14本あります。✏️<br>6本もらいました。",
+        formula:"14 ＋ 6 ＝",
+        answer:20
+    },
+
+    {
+        category:"ひき算 🟢",
+        text:"みかんが25こあります。🍊<br>8こ食べました。",
+        formula:"25 − 8 ＝",
+        answer:17
+    },
+
+    {
+        category:"たし算 🔵",
+        text:"赤いボールが17こ、<br>青いボールが12こあります。",
+        formula:"17 ＋ 12 ＝",
+        answer:29
+    },
+
+    {
+        category:"ひき算 🟢",
+        text:"30人の子どもがいます。<br>7人帰りました。",
+        formula:"30 − 7 ＝",
+        answer:23
+    },
+
+    {
+        category:"たし算 🔵",
+        text:"どんぐりを26こ拾いました。<br>あとで13こ拾いました。",
+        formula:"26 ＋ 13 ＝",
+        answer:39
+    },
+
+    {
+        category:"ひき算 🟢",
+        text:"おりがみが40まいあります。<br>15まい使いました。",
+        formula:"40 − 15 ＝",
+        answer:25
+    },
+
+    {
+        category:"たし算 🔵",
+        text:"バスに23人乗っています。🚌<br>9人乗ってきました。",
+        formula:"23 ＋ 9 ＝",
+        answer:32
+    },
+
+    {
+        category:"ひき算 🟢",
+        text:"50円持っています。<br>20円使いました。",
+        formula:"50 − 20 ＝",
+        answer:30
+    },
+
+    {
+        category:"九九 ⭐",
+        text:"3この箱に、<br>2こずつボールが入っています。",
+        formula:"3 × 2 ＝",
+        answer:6
+    },
+
+    {
+        category:"九九 ⭐",
+        text:"5人に、<br>3こずつあめを配ります。",
+        formula:"5 × 3 ＝",
+        answer:15
+    },
+
+    {
+        category:"九九 ⭐",
+        text:"4このお皿に、<br>2こずつケーキがあります。🍰",
+        formula:"4 × 2 ＝",
+        answer:8
+    },
+
+    {
+        category:"九九 ⭐",
+        text:"2 × 6 はいくつかな？",
+        formula:"2 × 6 ＝",
+        answer:12
+    },
+
+    {
+        category:"九九 ⭐",
+        text:"5 × 4 はいくつかな？",
+        formula:"5 × 4 ＝",
+        answer:20
+    },
+
+    {
+        category:"たし算 🔵",
+        text:"34と25をたすと？",
+        formula:"34 ＋ 25 ＝",
+        answer:59
+    },
+
+    {
+        category:"ひき算 🟢",
+        text:"63から21をひくと？",
+        formula:"63 − 21 ＝",
+        answer:42
+    },
+
+    {
+        category:"たし算 🔵",
+        text:"46と18をたすと？",
+        formula:"46 ＋ 18 ＝",
+        answer:64
+    },
+
+    {
+        category:"ひき算 🟢",
+        text:"72から35をひくと？",
+        formula:"72 − 35 ＝",
+        answer:37
+    },
+
+    {
+        category:"たし算 🔵",
+        text:"28と37をたすと？",
+        formula:"28 ＋ 37 ＝",
+        answer:65
+    },
+
+    {
+        category:"お金 💰",
+        text:"50円玉が1まい、<br>10円玉が3まいあります。<br>ぜんぶで何円？",
+        formula:"50 ＋ 30 ＝",
+        answer:80
+    },
+
+    {
+        category:"お金 💰",
+        text:"100円持っています。<br>60円のおかしを買いました。",
+        formula:"100 − 60 ＝",
+        answer:40
+    },
+
+    {
+        category:"長さ 📏",
+        text:"20cmのひもと<br>15cmのひもをつなぎました。",
+        formula:"20 ＋ 15 ＝",
+        answer:35
+    },
+
+    {
+        category:"長さ 📏",
+        text:"50cmのひもを<br>18cm切りました。",
+        formula:"50 − 18 ＝",
+        answer:32
+    },
+
+    {
+        category:"時計 ⏰",
+        text:"3時から2時間たつと、<br>何時でしょう？",
+        formula:"3 ＋ 2 ＝",
+        answer:5
+    },
+
+    {
+        category:"時計 ⏰",
+        text:"7時から3時間たつと、<br>何時でしょう？",
+        formula:"7 ＋ 3 ＝",
+        answer:10
+    },
+
+    {
+        category:"九九 ⭐",
+        text:"4人に5こずつ<br>シールを配ります。",
+        formula:"4 × 5 ＝",
+        answer:20
+    },
+
+    {
+        category:"九九 ⭐",
+        text:"3 × 7 はいくつかな？",
+        formula:"3 × 7 ＝",
+        answer:21
+    },
+
+    {
+        category:"チャレンジ 🔥",
+        text:"36 ＋ 27 はいくつかな？",
+        formula:"36 ＋ 27 ＝",
+        answer:63
+    },
+
+    {
+        category:"さいごの問題 👑",
+        text:"80から36をひくと？",
+        formula:"80 − 36 ＝",
+        answer:44
+    }
+
+];
+
+
+/* ================================
+   ゲーム処理
+================================ */
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+
+const questionText =
+    document.getElementById("questionText");
+
+const formulaLeft =
+    document.getElementById("formulaLeft");
+
+const answerInput =
+    document.getElementById("answer");
+
+const result =
+    document.getElementById("result");
+
+
+function showQuestion(){
+
+    const q = questions[current];
+
+    document.getElementById("category").innerHTML =
+        q.category;
+
+    questionText.innerHTML =
+        q.text;
+
+    formulaLeft.innerHTML =
+        q.formula;
+
+    answerInput.value = "";
+
+    answerInput.disabled = false;
+
+    result.innerHTML = "";
+
+    result.className = "result";
+
+    document.getElementById("questionCount").innerHTML =
+        (current + 1) + " / 30";
+
+    document.getElementById("progress").style.width =
+        ((current) / 30 * 100) + "%";
+
+    document.getElementById("checkBtn").style.display =
+        "block";
+
+    document.getElementById("nextBtn").style.display =
+        "none";
+
+    answered = false;
+
+    setTimeout(()=>{
+        answerInput.focus();
+    },300);
+}
+
+
+function checkAnswer(){
+
+    if(answered) return;
+
+    if(answerInput.value === ""){
+        result.innerHTML = "数字を入れてね 😊";
+        return;
+    }
+
+    const userAnswer =
+        Number(answerInput.value);
+
+    const correct =
+        questions[current].answer;
+
+    answered = true;
+
+    answerInput.disabled = true;
+
+    if(userAnswer === correct){
+
+        score++;
+
+        result.innerHTML =
+            "🎉 せいかい！";
+
+        result.className =
+            "result correct";
+
+        playCorrectSound();
+
+    }else{
+
+        result.innerHTML =
+            "おしい！ 正解は " +
+            correct +
+            " だよ 😊";
+
+        result.className =
+            "result wrong";
+
+        playWrongSound();
+    }
+
+    document.getElementById("score").innerHTML =
+        score;
+
+    document.getElementById("checkBtn").style.display =
+        "none";
+
+    document.getElementById("nextBtn").style.display =
+        "block";
+}
+
+
+function nextQuestion(){
+
+    current++;
+
+    if(current >= questions.length){
+
+        finishGame();
+
+    }else{
+
+        showQuestion();
+
+    }
+}
+
+
+function finishGame(){
+
+    document.getElementById("gameArea").style.display =
+        "none";
+
+    document.getElementById("finishArea").style.display =
+        "block";
+
+    document.getElementById("progress").style.width =
+        "100%";
+
+    document.getElementById("finalScore").innerHTML =
+        score;
+
+    let message = "";
+
+    if(score === 30){
+
+        message =
+            "👑 パーフェクト！<br>さんすうマスター！";
+
+    }else if(score >= 25){
+
+        message =
+            "🌟 すごい！ とってもよくできました！";
+
+    }else if(score >= 20){
+
+        message =
+            "😊 よくがんばりました！";
+
+    }else{
+
+        message =
+            "💪 もういちど挑戦してみよう！";
+
+    }
+
+    document.getElementById("finalMessage").innerHTML =
+        message;
+
+    document.getElementById("restartBtn").style.display =
+        "block";
+}
+
+
+function restartGame(){
+
+    current = 0;
+    score = 0;
+
+    document.getElementById("score").innerHTML =
+        "0";
+
+    document.getElementById("gameArea").style.display =
+        "block";
+
+    document.getElementById("finishArea").style.display =
+        "none";
+
+    showQuestion();
+}
+
+
+/* ================================
+   音
+================================ */
+
+function playCorrectSound(){
+
+    const ctx =
+        new (window.AudioContext ||
+             window.webkitAudioContext)();
+
+    const osc =
+        ctx.createOscillator();
+
+    const gain =
+        ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.frequency.setValueAtTime(
+        523,
+        ctx.currentTime
+    );
+
+    osc.frequency.setValueAtTime(
+        659,
+        ctx.currentTime + 0.12
+    );
+
+    osc.frequency.setValueAtTime(
+        784,
+        ctx.currentTime + 0.24
+    );
+
+    gain.gain.setValueAtTime(
+        0.25,
+        ctx.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.01,
+        ctx.currentTime + 0.45
+    );
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.45);
+}
+
+
+function playWrongSound(){
+
+    const ctx =
+        new (window.AudioContext ||
+             window.webkitAudioContext)();
+
+    const osc =
+        ctx.createOscillator();
+
+    const gain =
+        ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.frequency.value = 180;
+
+    gain.gain.setValueAtTime(
+        0.18,
+        ctx.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.01,
+        ctx.currentTime + 0.3
+    );
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+}
+
+
+/* Enterキーでも回答 */
+answerInput.addEventListener(
+    "keydown",
+    function(e){
+
+        if(e.key === "Enter"){
+
+            if(!answered){
+                checkAnswer();
+            }else{
+                nextQuestion();
+            }
+
+        }
+
+    }
+);
+
+
+/* 最初の問題 */
+showQuestion();
+
+</script>
+
+</body>
+</html>
